@@ -15,25 +15,39 @@ class Agenda {
         return this.#consultas
     }
 
-    getConsultasPorPeriodo(dataConsulta, horaInicio, horaFim) {
-        if(horaInicio === null && horaFim === null)
-            return this.#consultas.filter(consulta => consulta.data === dataConsulta)
-
+    getSobreposicaoDeAgendamento(dataConsulta, horaInicio, horaFim) {
         let horaInicioFormatada = DateTime.fromFormat(horaInicio, 'HHmm').toFormat('HH:mm')
         let horaFimFormatada = DateTime.fromFormat(horaFim, 'HHmm').toFormat('HH:mm')
-        console.log(dataConsulta, horaInicioFormatada, horaFimFormatada)
+        return this.#consultas.filter(consulta => 
+            consulta.data == dataConsulta && 
+            !(horaFimFormatada <= DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('HH:mm') || 
+            horaInicioFormatada >= DateTime.fromFormat(consulta.horaFim, 'HHmm').toFormat('HH:mm'))
+        );
+    }
 
-        console.log(this.#consultas.filter(
-            consulta =>
-            DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('HH:mm') <= horaInicioFormatada && 
-            DateTime.fromFormat(consulta.consulta.horaFim, 'HHmm').toFormat('HH:mm') <= horaFimFormatada
-        ))
-        return this.#consultas.filter(consulta => consulta.data === dataConsulta && consulta.horaInicio >= horaInicio && consulta.horaFim <= horaFim);
+    getConsultaFuturaDoPacientePorCpf(cpf) {
+        return this.#consultas.filter(consulta => 
+            consulta.paciente.cpf === cpf && 
+            (DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') > DateTime.now() ||
+            DateTime.fromFormat(consulta.horaInicio, 'HHmm') > DateTime.now())
+        );
+    }
+
+    excluirAgendamentosPorCpf(cpf) {
+        this.#consultas = this.#consultas.filter(consulta => consulta.paciente.cpf !== cpf)
+    }
+
+    cancelarAgendamento(cpf, dataConsulta, horaInicio) {
+        let index = this.#consultas.findIndex(consulta => consulta.paciente.cpf === cpf && consulta.data === dataConsulta && consulta.horaInicio === horaInicio);
+        if(index === -1) {
+            throw new Error('Erro: consulta não encontrada');
+        }
+        this.#consultas.splice(index, 1);
+        console.log('Consulta cancelada com sucesso!')
     }
 
     toString() {
-        console.log(this.#consultas.map(consulta => consulta.toString()).join('\n'))
-        // return this.#consultas.map(consulta => consulta.toString()).join('\n')
+        return this.#consultas.map(consulta => consulta.toString()).join('\n')
     }
 }
 

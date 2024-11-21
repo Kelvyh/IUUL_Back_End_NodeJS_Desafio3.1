@@ -5,16 +5,11 @@ class ConsultaController {
     #agenda = new Agenda();
 
     agendarConsulta(paciente, dataConsulta, horaInicio, horaFim) {
-        // if(this.#pacienteRepository.getPacienteByCpf(cpf))
-        //     throw new Error('Erro: CPF já cadastrado');
-        // this.#pacienteRepository.addPaciente(cpf, nome, dataNascimento);
-        // console.log("Paciente cadastrado com sucesso!")
         this.#agenda.agendarConsulta(paciente, dataConsulta, horaInicio, horaFim);
     }
 
-    // Método para listar todas as consultas
     listarConsultas() {
-        return this.#agenda.toString();
+        console.log(this.#agenda.toString());
     }
 
     checarAgendamentosFuturosPorPaciente(paciente) {
@@ -22,26 +17,6 @@ class ConsultaController {
         if (consultasFuturas.length > 0) {
             throw new Error('Erro: paciente com agendamento futuro');
         }
-    }
-
-    // Método para buscar uma consulta pelo id
-    buscarConsultaPorId(id) {
-        return this.consultas.find(consulta => consulta.id === id);
-    }
-
-    // Método para deletar uma consulta pelo id
-    deletarConsultaPorId(id) {
-        this.consultas = this.consultas.filter(consulta => consulta.id !== id);
-    }
-
-    // Método para atualizar uma consulta pelo id
-    atualizarConsultaPorId(id, consultaAtualizada) {
-        this.consultas = this.consultas.map(consulta => {
-            if (consulta.id === id) {
-                return consultaAtualizada;
-            }
-            return consulta;
-        });
     }
 
     validarData(dataConsulta) {
@@ -93,12 +68,33 @@ class ConsultaController {
         }
     }
 
-    checarAgendamentosFuturosPorDataEHora(dataConsulta = null, horaInicio = null, horaFim = null) {
-        // let consultasFuturas = this.#agenda.consultas.filter(consulta => consulta.data === dataConsulta && consulta.horaInicio === horaInicio && consulta.horaFim === horaFim && DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') > DateTime.now());
-        let consultasFuturas = this.#agenda.getConsultasPorPeriodo(dataConsulta, horaInicio, horaFim)
+    checarSobreposicaoDeAgendamento(dataConsulta, horaInicio, horaFim) {
+        let consultasFuturas = this.#agenda.getSobreposicaoDeAgendamento(dataConsulta, horaInicio, horaFim)
         if (consultasFuturas.length > 0) {
             throw new Error('Erro: já existe uma consulta agendada nessa data e horário');
         }
+    }
+
+    checarConsultaFuturoDoPacientePorCpf(cpf) {
+        let consultasFuturas = this.#agenda.getConsultaFuturaDoPacientePorCpf(cpf);
+        if (consultasFuturas.length > 0) {
+            throw new Error('Erro: paciente com agendamento futuro');
+        }
+    }
+
+    excluirAgendamentosPassadosPorCpf(cpf) {
+        this.#agenda.excluirAgendamentosPorCpf(cpf);
+    }
+
+    cancelarAgendamento(cpf, dataConsulta, horaInicio) {
+        console.log( DateTime.fromFormat(horaInicio, 'HHmm'))
+        console.log( DateTime.now())
+        if(DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy') < DateTime.now() ||
+        (DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy') == DateTime.now() && DateTime.fromFormat(horaInicio, 'HHmm') < DateTime.now())) {
+            throw new Error('Erro: data da consulta não pode ser no passado');
+        }
+        this.#agenda.cancelarAgendamento(cpf, dataConsulta, horaInicio);
+        console.log('Agendamento cancelado com sucesso!');
     }
 }
 

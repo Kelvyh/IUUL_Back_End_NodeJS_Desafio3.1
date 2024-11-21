@@ -6,7 +6,6 @@ import promptSync from 'prompt-sync';
 var prompt = promptSync({ sigint: true });
 
 function main() {
-    // let agenda = new Agenda();
     let pacienteController = new PacienteController();
     let consultaController = new ConsultaController();
     let cpf, nome, dataNascimento, pacientes, dataConsulta, horaInicio, horaFim, paciente;
@@ -67,9 +66,13 @@ function main() {
                         break;
                     case '2':
                         cpf = prompt('CPF: ')
-                        //falta olhar as consultas futuras na agenda
-                        pacienteController.excluirPaciente(cpf);
-                        //falta excluir os agendamentos passados
+                        try {
+                            consultaController.checarConsultaFuturoDoPacientePorCpf(cpf);
+                            consultaController.excluirAgendamentosPassadosPorCpf(cpf);
+                            pacienteController.excluirPaciente(cpf);
+                        } catch (e) {
+                            console.log(e.message)
+                        }
                         break;
                     case '3':
                         pacientes = pacienteController.listarPacientesPorCpf();
@@ -124,7 +127,7 @@ function main() {
                             horaFim = prompt('Horário de fim da consulta (no formato HHMM): ')
                             try {
                                 consultaController.validarHorario(horaInicio, horaFim, dataConsulta)
-                                consultaController.checarAgendamentosFuturosPorDataEHora(dataConsulta, horaInicio, horaFim)
+                                consultaController.checarSobreposicaoDeAgendamento(dataConsulta, horaInicio, horaFim)
                                 break;
                             } catch (e) {
                                 console.log(e.message)
@@ -133,32 +136,15 @@ function main() {
                         consultaController.agendarConsulta(paciente, dataConsulta, horaInicio, horaFim);
                         console.log("Agendamento realizado com sucesso!")
                         break;
-                        // while (true) {
-                        //     try {
-                        //         nome = prompt('Nome: ')
-                        //         pacienteController.validarNome(nome)
-                        //         break
-                        //     } catch (e) {
-                        //         console.log(e.message)
-                        //     }
-                        // }
-                        while (true) {
-                            try {
-                                dataNascimento = prompt('Data de nascimento: ')
-                                pacienteController.validarData(dataNascimento)
-                                break
-                            } catch (e) {
-                                console.log(e.message)
-                            }
-                        }
-                        pacienteController.cadastrarPaciente(cpf, nome, dataNascimento)
-                        break;
                     case '2':
-                        cpf = prompt('CPF do paciente que deseja excluir: ')
-                        //validar o cpf aqui também??
-                        //falta olhar as consultas futuras na agenda
-                        pacienteController.excluirPaciente(cpf);
-                        //falta excluir os agendamentos passados
+                        cpf = prompt('CPF: ')
+                        dataConsulta = prompt('Data da consulta (no formato DD/MM/AAAA): ')
+                        horaInicio = prompt('Horário de início da consulta (no formato HHMM): ')
+                        try {
+                            consultaController.cancelarAgendamento(cpf, dataConsulta, horaInicio);
+                        } catch (e) {
+                            console.log(e.message)
+                        }
                         break;
                     case '3':
                         consultaController.listarConsultas();
