@@ -15,6 +15,13 @@ class Agenda {
         return this.#consultas
     }
 
+    getConsultasPorPeriodo(dataInicio, dataFim) {
+        return this.#consultas.filter(consulta => 
+            DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') >= DateTime.fromFormat(dataInicio, 'dd/MM/yyyy') &&
+            DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') <= DateTime.fromFormat(dataFim, 'dd/MM/yyyy')
+        ).sort((consulta1, consulta2) => consulta1.data.localeCompare(consulta2.data));
+    }
+
     getSobreposicaoDeAgendamento(dataConsulta, horaInicio, horaFim) {
         let horaInicioFormatada = DateTime.fromFormat(horaInicio, 'HHmm').toFormat('HH:mm')
         let horaFimFormatada = DateTime.fromFormat(horaFim, 'HHmm').toFormat('HH:mm')

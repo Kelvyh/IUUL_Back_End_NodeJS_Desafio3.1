@@ -9,7 +9,11 @@ class ConsultaController {
     }
 
     listarConsultas() {
-        console.log(this.#agenda.toString());
+        console.log(this.#agenda.consultas.sort((consulta1, consulta2) => consulta1.data.localeCompare(consulta2.data)).map(consulta => consulta.toString()).join('\n'));
+    }
+
+    listarConsultasPorPeriodo(dataInicio, dataFim) {
+        console.log(this.#agenda.getConsultasPorPeriodo(dataInicio, dataFim).map(consulta => consulta.toString()).join('\n'));
     }
 
     checarAgendamentosFuturosPorPaciente(paciente) {
@@ -87,10 +91,10 @@ class ConsultaController {
     }
 
     cancelarAgendamento(cpf, dataConsulta, horaInicio) {
-        console.log( DateTime.fromFormat(horaInicio, 'HHmm'))
-        console.log( DateTime.now())
-        if(DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy') < DateTime.now() ||
-        (DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy') == DateTime.now() && DateTime.fromFormat(horaInicio, 'HHmm') < DateTime.now())) {
+        console.log(DateTime.fromFormat(horaInicio, 'HHmm'))
+        console.log(DateTime.now())
+        if(DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy').diffNow('days').as('days') <= -1 ||
+        ((DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy').diffNow('days').as('days') >-1 && DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy').diffNow('days').as('days') <= 0) && DateTime.fromFormat(horaInicio, 'HHmm') < DateTime.now())) {
             throw new Error('Erro: data da consulta não pode ser no passado');
         }
         this.#agenda.cancelarAgendamento(cpf, dataConsulta, horaInicio);

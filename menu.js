@@ -147,7 +147,19 @@ function main() {
                         }
                         break;
                     case '3':
-                        consultaController.listarConsultas();
+                        //toUpper
+                        let escolha = prompt('Apresentar a agenda T-Toda ou P-Periodo: ').toUpperCase();
+                        switch(escolha) {
+                            case "T": consultaController.listarConsultas();
+                            break;
+                        case "P": 
+                            let dataInicio = prompt('Data de início (no formato DD/MM/AAAA): ');
+                            let dataFim = prompt('Data de fim (no formato DD/MM/AAAA): ');
+                            consultaController.listarConsultasPorPeriodo(dataInicio, dataFim);
+                            break;
+                        default:
+                            console.log('Opção inválida!');
+                        }
                         break;
                     case '4':
                         pacientes = pacienteController.listarPacientesPorNome();
