@@ -33,11 +33,15 @@ class Agenda {
     }
 
     getConsultaFuturaDoPacientePorCpf(cpf) {
-        return this.#consultas.filter(consulta => 
+        let index = this.#consultas.findIndex(consulta => 
             consulta.paciente.cpf === cpf && 
             (DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') > DateTime.now() ||
-            DateTime.fromFormat(consulta.horaInicio, 'HHmm') > DateTime.now())
-        );
+            DateTime.fromFormat(consulta.horaInicio, 'HHmm') > DateTime.now()));
+        if(index === -1) {
+            return null
+        } else {
+            return this.#consultas[index]
+        }
     }
 
     excluirAgendamentosPorCpf(cpf) {
