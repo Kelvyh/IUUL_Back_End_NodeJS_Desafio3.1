@@ -4,6 +4,10 @@ import { Agenda } from './agenda.js';
 class ConsultaController {
     #agenda = new Agenda();
 
+    get agenda() {
+        return this.#agenda;
+    }
+
     agendarConsulta(paciente, dataConsulta, horaInicio, horaFim) {
         this.#agenda.agendarConsulta(paciente, dataConsulta, horaInicio, horaFim);
     }
@@ -80,10 +84,13 @@ class ConsultaController {
     }
 
     checarConsultaFuturoDoPacientePorCpf(cpf) {
-        let consultasFuturas = this.#agenda.getConsultaFuturaDoPacientePorCpf(cpf);
-        if (consultasFuturas.length > 0) {
+        if(this.#agenda.getConsultaFuturaDoPacientePorCpf(cpf) !== null) {
             throw new Error('Erro: paciente com agendamento futuro');
         }
+        // let consultasFuturas = this.#agenda.getConsultaFuturaDoPacientePorCpf(cpf);
+        // if (consultasFuturas.length > 0) {
+        //     throw new Error('Erro: paciente com agendamento futuro');
+        // }
     }
 
     excluirAgendamentosPassadosPorCpf(cpf) {
