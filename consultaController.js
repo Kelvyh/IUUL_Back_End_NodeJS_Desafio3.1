@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { Agenda } from './agenda.js';
+import Table from 'cli-table';
 
 class ConsultaController {
     #agenda = new Agenda();
@@ -13,11 +14,29 @@ class ConsultaController {
     }
 
     listarConsultas() {
-        console.log(this.#agenda.consultas.sort((consulta1, consulta2) => consulta1.data.localeCompare(consulta2.data)).map(consulta => consulta.toString()).join('\n'));
+        var table = new Table({
+            head: ['Data', 'H.Ini', 'H.Fim', 'Tempo', 'Nome', 'Dt.Nasc.'],
+            colWidths: [15, 10, 10, 10, 30, 15],
+            borders: false
+        });
+        this.#agenda.consultas.forEach(consulta => {
+            let tempo = DateTime.fromFormat(consulta.horaFim, 'HHmm').diff(DateTime.fromFormat(consulta.horaInicio, 'HHmm'), 'minutes').toFormat('hh:mm');
+            table.push([consulta.data, DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('hh:mm'), DateTime.fromFormat(consulta.horaFim, 'HHmm').toFormat('hh:mm'), tempo, consulta.paciente.nome, consulta.paciente.dataNascimento]);
+        });
+        console.log(table.toString());
     }
 
     listarConsultasPorPeriodo(dataInicio, dataFim) {
-        console.log(this.#agenda.getConsultasPorPeriodo(dataInicio, dataFim).map(consulta => consulta.toString()).join('\n'));
+        var table = new Table({
+            head: ['Data', 'H.Ini', 'H.Fim', 'Tempo', 'Nome', 'Dt.Nasc.'],
+            colWidths: [15, 10, 10, 10, 30, 15],
+            borders: false
+        });
+        this.#agenda.getConsultasPorPeriodo(dataInicio, dataFim).forEach(consulta => {
+            let tempo = DateTime.fromFormat(consulta.horaFim, 'HHmm').diff(DateTime.fromFormat(consulta.horaInicio, 'HHmm'), 'minutes').toFormat('hh:mm');
+            table.push([consulta.data, DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('hh:mm'), DateTime.fromFormat(consulta.horaFim, 'HHmm').toFormat('hh:mm'), tempo, consulta.paciente.nome, consulta.paciente.dataNascimento]);
+        });
+        console.log(table.toString());
     }
 
     checarAgendamentosFuturosPorPaciente(paciente) {

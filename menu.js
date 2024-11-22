@@ -51,7 +51,7 @@ function main() {
                         }
                         while (true) {
                             try {
-                                dataNascimento = prompt('Data de nascimento (no formato DD/MM/AAAA): ')
+                                dataNascimento = prompt('Data de nascimento: ')
                                 pacienteController.validarData(dataNascimento)
                                 break
                             } catch (e) {
@@ -96,7 +96,6 @@ function main() {
                 opcao = prompt('Escolha uma opção: ')
                 switch(opcao) {
                     case '1':
-                        //validar cpf??
                         while(true) {
                             cpf = prompt('CPF: ')
                             paciente = pacienteController.getPacienteByCpf(cpf)
@@ -112,7 +111,7 @@ function main() {
                             }
                         }
                         while(true) {
-                            dataConsulta = prompt('Data da consulta (no formato DD/MM/AAAA): ')
+                            dataConsulta = prompt('Data da consulta: ')
                             try {
                                 consultaController.validarData(dataConsulta)
                                 break;
@@ -121,8 +120,8 @@ function main() {
                             }
                         }
                         while(true) {
-                            horaInicio = prompt('Horário de início da consulta (no formato HHMM): ')
-                            horaFim = prompt('Horário de fim da consulta (no formato HHMM): ')
+                            horaInicio = prompt('Horário de início da consulta: ')
+                            horaFim = prompt('Horário de fim da consulta: ')
                             try {
                                 consultaController.validarHorario(horaInicio, horaFim, dataConsulta)
                                 consultaController.checarSobreposicaoDeAgendamento(dataConsulta, horaInicio, horaFim)
@@ -136,8 +135,8 @@ function main() {
                         break;
                     case '2':
                         cpf = prompt('CPF: ')
-                        dataConsulta = prompt('Data da consulta (no formato DD/MM/AAAA): ')
-                        horaInicio = prompt('Horário de início da consulta (no formato HHMM): ')
+                        dataConsulta = prompt('Data da consulta: ')
+                        horaInicio = prompt('Horário de início: ')
                         try {
                             consultaController.cancelarAgendamento(cpf, dataConsulta, horaInicio);
                         } catch (e) {
@@ -150,8 +149,8 @@ function main() {
                             case "T": consultaController.listarConsultas();
                             break;
                         case "P": 
-                            let dataInicio = prompt('Data de início (no formato DD/MM/AAAA): ');
-                            let dataFim = prompt('Data de fim (no formato DD/MM/AAAA): ');
+                            let dataInicio = prompt('Data de início : ');
+                            let dataFim = prompt('Data de fim: ');
                             consultaController.listarConsultasPorPeriodo(dataInicio, dataFim);
                             break;
                         default:
