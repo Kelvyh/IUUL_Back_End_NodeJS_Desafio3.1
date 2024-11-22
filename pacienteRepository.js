@@ -4,8 +4,16 @@ class PacienteRepository {
     #pacientes = [];
 
     constructor() {
-        this.#pacientes.push(new Paciente('07200731382', 'Kelvy', '19/04/2002'))
-        this.#pacientes.push(new Paciente('03888091322', 'Klaudia', '27/05/1979'))
+        this.#pacientes.push(new Paciente('36972742013', 'Fulano de tal 1', '13/09/1990'))
+        this.#pacientes.push(new Paciente('04804543023', 'Fulano de tal 2', '14/09/1991'))
+        this.#pacientes.push(new Paciente('83045508065', 'Fulano de tal 3', '15/09/1992'))
+        this.#pacientes.push(new Paciente('94143676087', 'Fulano de tal 4', '16/09/1993'))
+        this.#pacientes.push(new Paciente('27438131050', 'Fulano de tal 5', '17/09/1994'))
+        this.#pacientes.push(new Paciente('57045385099', 'Fulano de tal 6', '18/09/1995'))
+        this.#pacientes.push(new Paciente('29287381003', 'Fulano de tal 7', '19/09/1996'))
+        this.#pacientes.push(new Paciente('49381817030', 'Fulano de tal 8', '20/09/1997'))
+        this.#pacientes.push(new Paciente('81511299053', 'Fulano de tal 9', '21/09/1998'))
+        this.#pacientes.push(new Paciente('20279119011', 'Fulano de tal 10', '22/09/1999'))
     }
 
     addPaciente(cpf, nome, dataNascimento) {
