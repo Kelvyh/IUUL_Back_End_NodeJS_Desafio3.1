@@ -9,6 +9,18 @@ class Agenda {
     agendarConsulta(paciente, dataConsulta, horaInicio, horaFim) {
         let consulta = new Consulta(paciente, dataConsulta, horaInicio, horaFim)
         this.#consultas.push(consulta)
+        this.#organizarAgenda()
+    }
+
+    #organizarAgenda() {
+        this.#consultas.sort((consulta1, consulta2) => 
+            {
+                if(consulta1.data === consulta2.data) {
+                    return consulta1.horaInicio.localeCompare(consulta2.horaInicio)
+                } else {
+                    return DateTime.fromFormat(consulta1.data, 'dd/MM/yyyy').diff(DateTime.fromFormat(consulta2.data, 'dd/MM/yyyy'))
+                }
+            })
     }
 
     get consultas() {
