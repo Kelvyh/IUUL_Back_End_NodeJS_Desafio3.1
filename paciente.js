@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 class Paciente {
     #cpf
     #nome
@@ -26,6 +28,10 @@ class Paciente {
 
     get dataNascimento() {
         return this.#dataNascimento
+    }
+
+    getIdade(){
+        return DateTime.now().diff(DateTime.fromFormat(this.#dataNascimento, 'dd/MM/yyyy'), 'years').years.toFixed(0)
     }
     
     #testeCpf(cpf) {
