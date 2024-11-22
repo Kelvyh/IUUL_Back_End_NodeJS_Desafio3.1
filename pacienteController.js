@@ -74,7 +74,7 @@ class PacienteController {
         pacientes.forEach(paciente => {
             let consulta = consultaController.agenda.getConsultaFuturaDoPacientePorCpf(paciente.cpf);
             table.push([paciente.cpf, 
-                consulta !== null ? paciente.nome+'\n'+`Agendado para ${consulta.data}\n${consulta.horaInicio.slice(0, 2)}:${consulta.horaInicio.slice(2)} às ${consulta.horaFim.slice(0, 2)}:${consulta.horaFim.slice(2)}` : paciente.nome, 
+                consulta !== null ? paciente.nome+'\n'+`Agendado para ${consulta.data}\n${DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('hh:mm')} às ${DateTime.fromFormat(consulta.horaFim, 'HHmm').toFormat('hh:mm')}` : paciente.nome, 
                 paciente.dataNascimento, paciente.getIdade()]);
         });
         console.log(table.toString());
