@@ -1,5 +1,7 @@
 import { PacienteRepository } from './pacienteRepository.js';
+import { ConsultaController } from './consultaController.js';
 import { DateTime } from 'luxon';
+import Table from 'cli-table';
 
 class PacienteController {
     #pacienteRepository = new PacienteRepository();
@@ -63,12 +65,29 @@ class PacienteController {
         }
     }
 
-    listarPacientesPorCpf() {
-        return this.#pacienteRepository.getPacientesPorCpf();
+    #listarPacientes(pacientes, consultaController) {
+        var table = new Table({
+            head: ['CPF', 'Nome', 'Dt.Nasc.', 'Idade'],
+            colWidths: [15, 30, 15, 10],
+            borders: false
+        });
+        pacientes.forEach(paciente => {
+            let consulta = consultaController.agenda.getConsultaFuturaDoPacientePorCpf(paciente.cpf);
+            table.push([paciente.cpf, 
+                consulta !== null ? paciente.nome+'\n'+`Agendado para ${consulta.data}\n${consulta.horaInicio.slice(0, 2)}:${consulta.horaInicio.slice(2)} às ${consulta.horaFim.slice(0, 2)}:${consulta.horaFim.slice(2)}` : paciente.nome, 
+                paciente.dataNascimento, paciente.getIdade()]);
+        });
+        console.log(table.toString());
     }
 
-    listarPacientesPorNome() {
-        return this.#pacienteRepository.getPacientesPorNome();
+    listarPacientesPorCpf(consultaController) {
+        let pacientes = this.#pacienteRepository.getPacientesPorCpf();
+        this.#listarPacientes(pacientes, consultaController);
+    }
+
+    listarPacientesPorNome(consultaController) {
+        let pacientes = this.#pacienteRepository.getPacientesPorNome();
+        this.#listarPacientes(pacientes, consultaController);
     }
 }
 

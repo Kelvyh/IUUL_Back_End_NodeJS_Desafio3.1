@@ -1,8 +1,8 @@
-// import { Agenda } from './agenda';
 import { PacienteController } from './pacienteController.js';
 import { ConsultaController } from './consultaController.js';
 
 import promptSync from 'prompt-sync';
+
 var prompt = promptSync({ sigint: true });
 
 function main() {
@@ -75,12 +75,10 @@ function main() {
                         }
                         break;
                     case '3':
-                        pacientes = pacienteController.listarPacientesPorCpf();
-                        pacientes.forEach(paciente => console.log(paciente.toString()));
+                        pacienteController.listarPacientesPorCpf(consultaController);
                         break;
                     case '4':
-                        pacientes = pacienteController.listarPacientesPorNome();
-                        pacientes.forEach(paciente => console.log(paciente.toString()));
+                        pacienteController.listarPacientesPorNome(consultaController);
                         break;
                     case '5':
                         break;
@@ -147,7 +145,6 @@ function main() {
                         }
                         break;
                     case '3':
-                        //toUpper
                         let escolha = prompt('Apresentar a agenda T-Toda ou P-Periodo: ').toUpperCase();
                         switch(escolha) {
                             case "T": consultaController.listarConsultas();
@@ -162,8 +159,6 @@ function main() {
                         }
                         break;
                     case '4':
-                        pacientes = pacienteController.listarPacientesPorNome();
-                        pacientes.forEach(paciente => console.log(paciente.toString()));
                         break;
                     default:
                         console.log('Opção inválida!')
