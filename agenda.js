@@ -1,37 +1,23 @@
-import { Paciente } from "./paciente.js"
 import { Consulta } from "./consulta.js"
+import { consultaDAO } from "./daos/consultaDAO.js"
 
 import { DateTime } from 'luxon'
 
 class Agenda {
     #consultas = []
+    #consultaDAO = new consultaDAO()
 
-    agendarConsulta(paciente, dataConsulta, horaInicio, horaFim) {
-        let consulta = new Consulta(paciente, dataConsulta, horaInicio, horaFim)
-        this.#consultas.push(consulta)
-        this.#organizarAgenda()
+    async agendarConsulta(paciente, dataConsulta, horaInicio, horaFim) {
+        const consulta = new Consulta(paciente, dataConsulta, horaInicio, horaFim)
+        await this.#consultaDAO.addConsulta(consulta)
     }
 
-    #organizarAgenda() {
-        this.#consultas.sort((consulta1, consulta2) => 
-            {
-                if(consulta1.data === consulta2.data) {
-                    return consulta1.horaInicio.localeCompare(consulta2.horaInicio)
-                } else {
-                    return DateTime.fromFormat(consulta1.data, 'dd/MM/yyyy').diff(DateTime.fromFormat(consulta2.data, 'dd/MM/yyyy'))
-                }
-            })
+    async getConsultas() {
+        return await this.#consultaDAO.listar()
     }
 
-    get consultas() {
-        return this.#consultas
-    }
-
-    getConsultasPorPeriodo(dataInicio, dataFim) {
-        return this.#consultas.filter(consulta => 
-            DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') >= DateTime.fromFormat(dataInicio, 'dd/MM/yyyy') &&
-            DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') <= DateTime.fromFormat(dataFim, 'dd/MM/yyyy')
-        ).sort((consulta1, consulta2) => consulta1.data.localeCompare(consulta2.data));
+    async getConsultasPorPeriodo(dataInicio, dataFim) {
+        return await this.#consultaDAO.listarConsultasPorPeriodo(dataInicio, dataFim)
     }
 
     getSobreposicaoDeAgendamento(dataConsulta, horaInicio, horaFim) {
@@ -44,29 +30,20 @@ class Agenda {
         );
     }
 
-    getConsultaFuturaDoPacientePorCpf(cpf) {
-        let index = this.#consultas.findIndex(consulta => 
-            consulta.paciente.cpf === cpf && 
-            (DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') > DateTime.now() ||
-            DateTime.fromFormat(consulta.horaInicio, 'HHmm') > DateTime.now()));
-        if(index === -1) {
-            return null
-        } else {
-            return this.#consultas[index]
-        }
+    async getConsultaFuturaDoPacientePorCpf(cpf) {
+        const consulta = await this.#consultaDAO.getConsultaByCpf(cpf);
+        return consulta;
     }
 
-    excluirAgendamentosPorCpf(cpf) {
-        this.#consultas = this.#consultas.filter(consulta => consulta.paciente.cpf !== cpf)
+    async excluirAgendamentosPorCpf(cpf) {
+        await this.#consultaDAO.excluirConsulta(cpf);
     }
 
-    cancelarAgendamento(cpf, dataConsulta, horaInicio) {
-        let index = this.#consultas.findIndex(consulta => consulta.paciente.cpf === cpf && consulta.data === dataConsulta && consulta.horaInicio === horaInicio);
-        if(index === -1) {
+    async cancelarAgendamento(cpf, dataConsulta, horaInicio) {
+        const consulta = await this.#consultaDAO.cancelarAgendamento(cpf, dataConsulta, horaInicio);
+        if(consulta == 0) {
             throw new Error('Erro: consulta não encontrada');
         }
-        this.#consultas.splice(index, 1);
-        console.log('Consulta cancelada com sucesso!')
     }
 
     toString() {

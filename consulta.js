@@ -1,6 +1,3 @@
-import {Paciente} from './paciente.js'
-import {DateTime} from 'luxon'
-
 class Consulta {
     #paciente
     #data

@@ -1,14 +1,15 @@
 import { PacienteController } from './pacienteController.js';
 import { ConsultaController } from './consultaController.js';
+import { sequelize } from './db.js';
 
 import promptSync from 'prompt-sync';
 
 var prompt = promptSync({ sigint: true });
 
-function main() {
+async function main() {
     let pacienteController = new PacienteController();
     let consultaController = new ConsultaController();
-    let cpf, nome, dataNascimento, pacientes, dataConsulta, horaInicio, horaFim, paciente;
+    let cpf, nome, dataNascimento, dataConsulta, horaInicio, horaFim, paciente;
         
 
     while (true) {
@@ -67,18 +68,18 @@ function main() {
                     case '2':
                         cpf = prompt('CPF: ')
                         try {
-                            consultaController.checarConsultaFuturoDoPacientePorCpf(cpf);
-                            consultaController.excluirAgendamentosPassadosPorCpf(cpf);
-                            pacienteController.excluirPaciente(cpf);
+                            await consultaController.checarConsultaFuturoDoPacientePorCpf(cpf);
+                            await consultaController.excluirAgendamentosPassadosPorCpf(cpf);
+                            await pacienteController.excluirPaciente(cpf);
                         } catch (e) {
                             console.log(e.message)
                         }
                         break;
                     case '3':
-                        pacienteController.listarPacientesPorCpf(consultaController);
+                        await pacienteController.listarPacientesPorCpf(consultaController);
                         break;
                     case '4':
-                        pacienteController.listarPacientesPorNome(consultaController);
+                        await pacienteController.listarPacientesPorNome(consultaController);
                         break;
                     case '5':
                         break;
@@ -98,12 +99,12 @@ function main() {
                     case '1':
                         while(true) {
                             cpf = prompt('CPF: ')
-                            paciente = pacienteController.getPacienteByCpf(cpf)
+                            paciente = await pacienteController.getPacienteByCpf(cpf)
                             if(!paciente) {
                                 console.log('Erro: Paciente não cadastrado')
                             } else {
                                 try {
-                                    consultaController.checarAgendamentosFuturosPorPaciente(paciente);
+                                    await consultaController.checarAgendamentosFuturosPorPaciente(paciente);
                                     break;
                                 } catch (e) {
                                     console.log(e.message)
@@ -138,7 +139,7 @@ function main() {
                         dataConsulta = prompt('Data da consulta: ')
                         horaInicio = prompt('Horário de início: ')
                         try {
-                            consultaController.cancelarAgendamento(cpf, dataConsulta, horaInicio);
+                            await consultaController.cancelarAgendamento(cpf, dataConsulta, horaInicio);
                         } catch (e) {
                             console.log(e.message)
                         }
@@ -146,12 +147,12 @@ function main() {
                     case '3':
                         let escolha = prompt('Apresentar a agenda T-Toda ou P-Periodo: ').toUpperCase();
                         switch(escolha) {
-                            case "T": consultaController.listarConsultas();
+                            case "T": await consultaController.listarConsultas();
                             break;
                         case "P": 
                             let dataInicio = prompt('Data de início : ');
                             let dataFim = prompt('Data de fim: ');
-                            consultaController.listarConsultasPorPeriodo(dataInicio, dataFim);
+                            await consultaController.listarConsultasPorPeriodo(dataInicio, dataFim);
                             break;
                         default:
                             console.log('Opção inválida!');
@@ -169,7 +170,12 @@ function main() {
             default:
                 console.log('Opção inválida!')
         }
+        try {
+            await sequelize.sync();
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
-main()
+export { main }

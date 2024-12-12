@@ -9,39 +9,45 @@ class ConsultaController {
         return this.#agenda;
     }
 
-    agendarConsulta(paciente, dataConsulta, horaInicio, horaFim) {
-        this.#agenda.agendarConsulta(paciente, dataConsulta, horaInicio, horaFim);
+    async agendarConsulta(paciente, dataConsulta, horaInicio, horaFim) {
+        await this.#agenda.agendarConsulta(paciente, dataConsulta, horaInicio, horaFim);
     }
 
-    listarConsultas() {
+    async listarConsultas() {
         var table = new Table({
             head: ['Data', 'H.Ini', 'H.Fim', 'Tempo', 'Nome', 'Dt.Nasc.'],
             colWidths: [15, 10, 10, 10, 30, 15],
             borders: false
         });
-        this.#agenda.consultas.forEach(consulta => {
-            let tempo = DateTime.fromFormat(consulta.horaFim, 'HHmm').diff(DateTime.fromFormat(consulta.horaInicio, 'HHmm'), 'minutes').toFormat('hh:mm');
-            table.push([consulta.data, DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('hh:mm'), DateTime.fromFormat(consulta.horaFim, 'HHmm').toFormat('hh:mm'), tempo, consulta.paciente.nome, consulta.paciente.dataNascimento]);
-        });
+        
+        const consultas = await this.#agenda.getConsultas();
+
+        for (let consulta of consultas) {
+            let tempo = DateTime.fromFormat(consulta.horaFim, 'HH:mm:ss').diff(DateTime.fromFormat(consulta.horaInicio, 'HH:mm:ss'), 'minutes').toFormat('hh:mm');
+            table.push([DateTime.fromISO(consulta.data).toFormat('dd/MM/yyyy'), consulta.horaInicio.slice(0, 5), consulta.horaFim.slice(0, 5), tempo, consulta['paciente.nome'], DateTime.fromISO(consulta['paciente.dataNascimento']).toFormat('dd/MM/yyyy')]);
+        };
         console.log(table.toString());
     }
 
-    listarConsultasPorPeriodo(dataInicio, dataFim) {
+    async listarConsultasPorPeriodo(dataInicio, dataFim) {
         var table = new Table({
             head: ['Data', 'H.Ini', 'H.Fim', 'Tempo', 'Nome', 'Dt.Nasc.'],
             colWidths: [15, 10, 10, 10, 30, 15],
             borders: false
         });
-        this.#agenda.getConsultasPorPeriodo(dataInicio, dataFim).forEach(consulta => {
-            let tempo = DateTime.fromFormat(consulta.horaFim, 'HHmm').diff(DateTime.fromFormat(consulta.horaInicio, 'HHmm'), 'minutes').toFormat('hh:mm');
-            table.push([consulta.data, DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('hh:mm'), DateTime.fromFormat(consulta.horaFim, 'HHmm').toFormat('hh:mm'), tempo, consulta.paciente.nome, consulta.paciente.dataNascimento]);
-        });
+
+        const consultas = await this.#agenda.getConsultasPorPeriodo(dataInicio, dataFim);
+
+        for (let consulta of consultas) {
+            let tempo = DateTime.fromFormat(consulta.horaFim, 'HH:mm:ss').diff(DateTime.fromFormat(consulta.horaInicio, 'HH:mm:ss'), 'minutes').toFormat('hh:mm');
+            table.push([DateTime.fromISO(consulta.data).toFormat('dd/MM/yyyy'), consulta.horaInicio.slice(0, 5), consulta.horaFim.slice(0, 5), tempo, consulta['paciente.nome'], DateTime.fromISO(consulta['paciente.dataNascimento']).toFormat('dd/MM/yyyy')]);
+        };
         console.log(table.toString());
     }
 
-    checarAgendamentosFuturosPorPaciente(paciente) {
-        let consultasFuturas = this.#agenda.consultas.filter(consulta => consulta.paciente === paciente && DateTime.fromFormat(consulta.data, 'dd/MM/yyyy') > DateTime.now());
-        if (consultasFuturas.length > 0) {
+    async checarAgendamentosFuturosPorPaciente(paciente) {
+        let consultasFuturas = await this.#agenda.getConsultaFuturaDoPacientePorCpf(paciente.cpf);
+        if (consultasFuturas != null) {
             throw new Error('Erro: paciente com agendamento futuro');
         }
     }
@@ -102,28 +108,22 @@ class ConsultaController {
         }
     }
 
-    checarConsultaFuturoDoPacientePorCpf(cpf) {
-        if(this.#agenda.getConsultaFuturaDoPacientePorCpf(cpf) !== null) {
+    async checarConsultaFuturoDoPacientePorCpf(cpf) {
+        if(await this.#agenda.getConsultaFuturaDoPacientePorCpf(cpf) !== null) {
             throw new Error('Erro: paciente com agendamento futuro');
         }
-        // let consultasFuturas = this.#agenda.getConsultaFuturaDoPacientePorCpf(cpf);
-        // if (consultasFuturas.length > 0) {
-        //     throw new Error('Erro: paciente com agendamento futuro');
-        // }
     }
 
-    excluirAgendamentosPassadosPorCpf(cpf) {
-        this.#agenda.excluirAgendamentosPorCpf(cpf);
+    async excluirAgendamentosPassadosPorCpf(cpf) {
+        await this.#agenda.excluirAgendamentosPorCpf(cpf);
     }
 
-    cancelarAgendamento(cpf, dataConsulta, horaInicio) {
-        console.log(DateTime.fromFormat(horaInicio, 'HHmm'))
-        console.log(DateTime.now())
+    async cancelarAgendamento(cpf, dataConsulta, horaInicio) {
         if(DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy').diffNow('days').as('days') <= -1 ||
         ((DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy').diffNow('days').as('days') >-1 && DateTime.fromFormat(dataConsulta, 'dd/MM/yyyy').diffNow('days').as('days') <= 0) && DateTime.fromFormat(horaInicio, 'HHmm') < DateTime.now())) {
             throw new Error('Erro: data da consulta não pode ser no passado');
         }
-        this.#agenda.cancelarAgendamento(cpf, dataConsulta, horaInicio);
+        await this.#agenda.cancelarAgendamento(cpf, dataConsulta, horaInicio);
         console.log('Agendamento cancelado com sucesso!');
     }
 }

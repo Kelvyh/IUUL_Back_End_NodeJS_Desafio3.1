@@ -46,10 +46,10 @@ class PacienteController {
             throw new Error('Erro: paciente deve ter pelo menos 13 anos.');
     }
 
-    cadastrarPaciente(cpf, nome, dataNascimento) {
-        if(this.#pacienteRepository.getPacienteByCpf(cpf))
+    async cadastrarPaciente(cpf, nome, dataNascimento) {
+        if(await this.#pacienteRepository.getPacienteByCpf(cpf))
             throw new Error('Erro: CPF já cadastrado');
-        this.#pacienteRepository.addPaciente(cpf, nome, dataNascimento);
+        await this.#pacienteRepository.addPaciente(cpf, nome, dataNascimento);
         console.log("Paciente cadastrado com sucesso!")
     }
 
@@ -57,37 +57,42 @@ class PacienteController {
         return this.#pacienteRepository.getPacienteByCpf(cpf);
     }
 
-    excluirPaciente(cpf) {
+    async excluirPaciente(cpf) {
         try {
-            this.#pacienteRepository.excluirPaciente(cpf);
+            await this.#pacienteRepository.excluirPaciente(cpf);
         } catch(e) {
             console.log(e.message);
         }
     }
 
-    #listarPacientes(pacientes, consultaController) {
+    #getIdade(dataNascimento) {
+        return Math.floor(DateTime.now().diff(DateTime.fromISO(dataNascimento), 'years').years)
+    }
+
+    async #listarPacientes(pacientes, consultaController) {
         var table = new Table({
             head: ['CPF', 'Nome', 'Dt.Nasc.', 'Idade'],
             colWidths: [15, 30, 15, 10],
             borders: false
         });
-        pacientes.forEach(paciente => {
-            let consulta = consultaController.agenda.getConsultaFuturaDoPacientePorCpf(paciente.cpf);
+
+        for(let paciente of pacientes) {
+            let consulta = await consultaController.agenda.getConsultaFuturaDoPacientePorCpf(paciente.cpf);
             table.push([paciente.cpf, 
-                consulta !== null ? paciente.nome+'\n'+`Agendado para ${consulta.data}\n${DateTime.fromFormat(consulta.horaInicio, 'HHmm').toFormat('hh:mm')} às ${DateTime.fromFormat(consulta.horaFim, 'HHmm').toFormat('hh:mm')}` : paciente.nome, 
-                paciente.dataNascimento, paciente.getIdade()]);
-        });
+                consulta !== null ? paciente.nome+'\n'+`Agendado para ${DateTime.fromISO(consulta.data).toFormat('dd/MM/yyyy')}\n${consulta.horaInicio.slice(0, 5)} às ${consulta.horaFim.slice(0, 5)}` : paciente.nome, 
+                DateTime.fromISO(paciente.dataNascimento).toFormat('dd/MM/yyyy'), this.#getIdade(paciente.dataNascimento)]);
+        }
         console.log(table.toString());
     }
 
-    listarPacientesPorCpf(consultaController) {
-        let pacientes = this.#pacienteRepository.getPacientesPorCpf();
-        this.#listarPacientes(pacientes, consultaController);
+    async listarPacientesPorCpf(consultaController) {
+        let pacientes = await this.#pacienteRepository.getPacientesPorCpf();
+        await this.#listarPacientes(pacientes, consultaController);
     }
 
-    listarPacientesPorNome(consultaController) {
-        let pacientes = this.#pacienteRepository.getPacientesPorNome();
-        this.#listarPacientes(pacientes, consultaController);
+    async listarPacientesPorNome(consultaController) {
+        let pacientes = await this.#pacienteRepository.getPacientesPorNome();
+        await this.#listarPacientes(pacientes, consultaController);
     }
 }
 
